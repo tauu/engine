@@ -35,6 +35,9 @@ class PersistedPlatformView extends PersistedLeafSurface {
     // it impossible to enable accessibility.
     element.style.pointerEvents = 'auto';
 
+    // Enforce the effective size of the PlatformView.
+    element.style.overflow = 'hidden';
+
     _shadowRoot = element.attachShadow(<String, String>{'mode': 'open'});
     final html.StyleElement _styleReset = html.StyleElement();
     _styleReset.innerHtml = '''
@@ -61,6 +64,14 @@ class PersistedPlatformView extends PersistedLeafSurface {
       ..transform = 'translate(${dx}px, ${dy}px)'
       ..width = '${width}px'
       ..height = '${height}px';
+    // Set size of the root element created by the PlatformView.
+    final html.Element platformView =
+        platformViewRegistry.getCreatedView(viewId);
+    if (platformView != null) {
+      platformView.style
+        ..width = '${width}px'
+        ..height = '${height}px';
+    }
   }
 
   @override
@@ -72,10 +83,13 @@ class PersistedPlatformView extends PersistedLeafSurface {
   void update(PersistedPlatformView oldSurface) {
     super.update(oldSurface);
     if (viewId != oldSurface.viewId) {
-      // the content of the surface has to be rebuild if the viewId is changed
+      // The content of the surface has to be rebuild if the viewId is changed.
       build();
-    } else if (dx != oldSurface.dx || dy != oldSurface.dy || width != oldSurface.width || height != oldSurface.height) {
-      // a change in any of the dimensions is performed by calling apply
+    } else if (dx != oldSurface.dx ||
+        dy != oldSurface.dy ||
+        width != oldSurface.width ||
+        height != oldSurface.height) {
+      // A change in any of the dimensions is performed by calling apply.
       apply();
     }
   }
